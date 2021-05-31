@@ -111,7 +111,8 @@ end
 
 function adb_send(filepath, adbpath="adb")
     begin
-        run(Cmd([adbpath, "push", filepath, "/sdcard/Download"]))
+        cmd = Cmd([adbpath, "push", filepath, "/sdcard/Download"])
+        run(cmd)
         run(Cmd([
                  adbpath,
                  "shell",
@@ -123,7 +124,7 @@ function adb_send(filepath, adbpath="adb")
                  "text/plain",
                  "--eu",
                  "android.intent.extra.STREAM",
-                 "file:///storage/emulated/0/Download/"*basename(filepath)
+                 "\"file:///storage/emulated/0/Download/"*basename(filepath)*"\""
                 ]
                )
            )
