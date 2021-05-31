@@ -1,6 +1,5 @@
 using Gtk
 import Gtk: showall
-using DataStructures
 
 include("ADB.jl")
 using .ADB
