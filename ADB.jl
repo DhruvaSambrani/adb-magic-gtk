@@ -105,14 +105,15 @@ function adb_text(text, adbpath="adb", unicode=true)
                      "\""*_preprocess(text, unicode)*"\""
                     ]))
         end
-        adb_key("enter", adbpath)
+        if last(text) != ';'
+            adb_key("enter", adbpath)
+        end
     end
 end
 
 function adb_send(filepath, adbpath="adb")
     begin
-        cmd = Cmd([adbpath, "push", filepath, "/sdcard/Download"])
-        run(cmd)
+        run(Cmd([adbpath, "push", filepath, "/sdcard/Download"]))
         run(Cmd([
                  adbpath,
                  "shell",
