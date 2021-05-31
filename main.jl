@@ -33,9 +33,28 @@ function set_key_callbacks!(i::Instance)
         )
     end
 end
+
 function update_notifications(i::Instance)
-    adb_notify()
+    box = i.builder["box_notify"]
+    #=while length(box) > 0
+        delete!(box, box[1])
+    end=#
+    notifications = adb_notify(i.adb_path)
+    map(notifications) do notif
+        label = GtkLabel(notif.notification_text) 
+        GAccessor.line_wrap(label, true)
+        GAccessor.xalign(label, 0.0)
+        b = GtkButton(label)
+        GAccessor.relief(b, Gtk.GConstants.GtkReliefStyle.NONE)
+        signal_connect(b, "clicked") do w
+            println("Link $(notif.activity_name)")
+            run_activity(notif)
+        end
+        frame = GtkFrame(b, notif.activity_name)
+        push!(box, frame)
+    end
 end
+
 function set_text_callback!(i::Instance)
     signal_connect(
         i.builder["textinput_entry"], 
@@ -44,7 +63,7 @@ function set_text_callback!(i::Instance)
         text = get_gtk_property(widget, :text, String) 
         adb_text(text,
             i.adb_path,
-            get_gtk_property(i.builder["checkbox_uni"], :active,Bool)
+            get_gtk_property(i.builder["checkbox_uni"], :active, Bool)
         )
         set_gtk_property!(widget, :text, "")
     end
@@ -68,11 +87,19 @@ function set_filepicker_callback!(i::Instance)
         adb_send(filepath, i.adb_path)
     end
 end
+function set_notifications_callback!(i::Instance)
+    signal_connect(i.builder["button_refresh"], "clicked") do widget
+        update_notifications(i)
+    end
+end
+
 function set_callbacks!(i::Instance)
     set_key_callbacks!(i)
     set_text_callback!(i)
     set_ui_callback!(i)
     set_filepicker_callback!(i)
+    set_notifications_callback!(i)
+    update_notifications(i)
 end
 
 waitfordestroy(i::Instance) = Gtk.waitforsignal(

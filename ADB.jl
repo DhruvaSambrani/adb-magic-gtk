@@ -1,6 +1,8 @@
 module ADB
+import Base.==
 using Base64
-export adb_key, adb_ui, adb_text, adb_send
+
+export adb_key, adb_ui, adb_text, adb_send, Notification, adb_notify, run_activity, get_text
 
 _name_key_map=Dict(
                    "home"=>"KEYCODE_HOME",
@@ -27,20 +29,28 @@ struct Notification
         new(match.captures[1], match.captures[2])
     end
 end
-
-function run_activity(n::Notification, adbpath="adb")
-    run(Cmd([adbpath, "shell", "monkey", "-p", n.activity_name, "1"]))
+function ==(n1::Notification, n2::Notification)
+    n1.notification_text == n2.notification_text
 end
-
+function run_activity(n::Notification, adbpath="adb")
+    cmd = Cmd([adbpath, "shell", "monkey", "-p", n.activity_name, "1"])
+    run(cmd, wait=false)
+end
+function get_text(n::Notification)
+    join("\n",[
+        n.notification_text[1:40], 
+        n.notification_text[41:80]
+    ])
+end
 function adb_notify(adbpath="adb")
     notif_string = readchomp(Cmd([
         adbpath, "shell",
         "dumpsys","notification", "--noredact"
     ]))
-    map(Notification, eachmatch(
-        r"NotificationRecord.*?pkg=(.*?)\ u.*?text=.*?\((.*?)\)"is,
-        notif
-    ))
+    unique(map(Notification, eachmatch(
+        r"NotificationRecord.*?pkg=(.*?)\ u.*?text=.*?\((.*?)\)"s,
+        notif_string
+    )))
 end
 
 function _preprocess(text, unicode)
@@ -51,8 +61,6 @@ function _preprocess(text, unicode)
         replace(unesc, "`"=>"\\`")
     end
 end
-
-_adb_holder(text) = println(text)
 
 function adb_key(keyval, adbpath="adb")
     run(Cmd([adbpath, "shell", "input", "keyevent", _name_key_map[keyval]]), wait=false)
@@ -73,33 +81,32 @@ function adb_ui(searchtext, adbpath="adb")
 end
 
 function adb_text(text, adbpath="adb", unicode=true)
-    if unicode
-        run(Cmd([
-                 adbpath,
-                 "shell",
-                 "am",
-                 "broadcast",
-                 "-a",
-                 "ADB_INPUT_B64",
-                 "--es",
-                 "msg",
-                 "\""*_preprocess(text, unicode)*"\""
-                ]),
-            wait = false
-           )
-    else
-        run(Cmd([
-                 adbpath,
-                 "shell",
-                 "input",
-                 "keyboard",
-                 "text",
-                 "\""*_preprocess(text, unicode)*"\""
-                ]),
-            wait = false
-           )
+    @async begin
+        if unicode
+            run(Cmd([
+                     adbpath,
+                     "shell",
+                     "am",
+                     "broadcast",
+                     "-a",
+                     "ADB_INPUT_B64",
+                     "--es",
+                     "msg",
+                     "\""*_preprocess(text, unicode)*"\""
+                    ])
+               )
+        else
+            run(Cmd([
+                     adbpath,
+                     "shell",
+                     "input",
+                     "keyboard",
+                     "text",
+                     "\""*_preprocess(text, unicode)*"\""
+                    ]))
+        end
+        adb_key("enter", adbpath)
     end
-    adb_key("enter", adbpath)
 end
 
 function adb_send(filepath, adbpath="adb")
