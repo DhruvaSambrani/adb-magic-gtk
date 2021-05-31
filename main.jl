@@ -36,9 +36,9 @@ end
 
 function update_notifications(i::Instance)
     box = i.builder["box_notify"]
-    #=while length(box) > 0
-        delete!(box, box[1])
-    end=#
+    while length(box) > 0
+        delete!(box, box[1]) 
+    end
     notifications = adb_notify(i.adb_path)
     map(notifications) do notif
         label = GtkLabel(notif.notification_text) 
@@ -47,12 +47,12 @@ function update_notifications(i::Instance)
         b = GtkButton(label)
         GAccessor.relief(b, Gtk.GConstants.GtkReliefStyle.NONE)
         signal_connect(b, "clicked") do w
-            println("Link $(notif.activity_name)")
             run_activity(notif)
         end
         frame = GtkFrame(b, notif.activity_name)
         push!(box, frame)
     end
+    showall(i)
 end
 
 function set_text_callback!(i::Instance)
@@ -83,8 +83,9 @@ function set_filepicker_callback!(i::Instance)
             open_dialog("Send File"),
             "/home/dhruva/winhome" => "C://Users/dhruv"
         )
-        println(filepath)
-        adb_send(filepath, i.adb_path)
+        if !isempty(filepath)
+            adb_send(filepath, i.adb_path)
+        end
     end
 end
 function set_notifications_callback!(i::Instance)

@@ -54,6 +54,7 @@
                     <property name="icon_size">2</property>
                   </object>
                 </child>
+                <accelerator key="k" signal="clicked" modifiers="GDK_MOD1_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>
