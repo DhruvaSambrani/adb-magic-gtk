@@ -4,9 +4,10 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="main_win">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">ADB Magic</property>
     <property name="window_position">center</property>
+    <property name="hide_titlebar_when_maximized">True</property>
     <property name="icon_name">computer</property>
-    <property name="deletable">False</property>
     <property name="gravity">center</property>
     <property name="has_resize_grip">True</property>
     <child type="titlebar">
@@ -349,8 +350,11 @@
               <object class="GtkEntry" id="textinput_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="invisible_char">*</property>
+                <property name="activates_default">True</property>
                 <property name="progress_pulse_step">0</property>
                 <property name="placeholder_text" translatable="yes">Enter Text</property>
+                <property name="input_hints">GTK_INPUT_HINT_SPELLCHECK | GTK_INPUT_HINT_WORD_COMPLETION | GTK_INPUT_HINT_EMOJI | GTK_INPUT_HINT_NONE</property>
                 <property name="show_emoji_icon">True</property>
                 <property name="enable_emoji_completion">True</property>
                 <accelerator key="i" signal="grab-focus" modifiers="GDK_MOD1_MASK"/>
@@ -372,7 +376,9 @@
                   <object class="GtkImage">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="icon_name">emblem-documents</property>
+                    <property name="pixel_size">20</property>
+                    <property name="icon_name">face-smile</property>
+                    <property name="icon_size">2</property>
                   </object>
                 </child>
                 <accelerator key="i" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_MOD1_MASK"/>
