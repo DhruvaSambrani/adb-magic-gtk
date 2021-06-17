@@ -55,6 +55,9 @@ end
 
 function _preprocess(text, unicode)
     unesc = unescape_string(text)
+    if last(unesc) == ';'
+        unesc =  unesc[1:prevind(unesc, end, 2)]
+    end
     if unicode
         base64encode(unesc)
     else
