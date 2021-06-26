@@ -82,9 +82,9 @@ function set_filepicker_callback!(i::Instance)
             open_dialog("Send File"),
             "/home/dhruva/winhome" => "C://Users/dhruv"
         )
-        #if !isempty(filepath)
+        if !isempty(filepath)
             adb_send(filepath, i.adb_path)
-        #end
+        end
     end
 end
 function set_notifications_callback!(i::Instance)
